@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState, use } from "react";
 import Editor, { OnMount } from "@monaco-editor/react";
 import { editor } from "monaco-editor";
 import { FC } from "react";
-import supabase from "@/util/supabase";
+import supabase from "@/app/util/supabase";
 
 interface PromptContent {
   title: string;

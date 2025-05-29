@@ -1,17 +1,17 @@
-import  supabase  from './supabase'
+import supabase from "./supabase";
 
 export default function Authentication() {
   const handleGoogleSignIn = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
+      provider: "google",
       options: { redirectTo: window.location.origin },
-    })
+    });
 
     if (error) {
-      console.error('Google sign-in error:', error.message)
-      alert(error.message)
+      console.error("Google sign-in error:", error.message);
+      alert(error.message);
     }
-  }
+  };
 
   return (
     <div className="flex flex-col items-center justify-center w-full max-w-sm mx-auto p-4">
@@ -23,5 +23,5 @@ export default function Authentication() {
         Sign in with Google
       </button>
     </div>
-  )
+  );
 }
