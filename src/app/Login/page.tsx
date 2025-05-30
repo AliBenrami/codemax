@@ -5,7 +5,9 @@ export default function Authentication() {
   const handleGoogleSignIn = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: window.location.origin },
+      options: {
+        redirectTo: `${window.location.origin}/Dashboard`,
+      },
     });
 
     if (error) {
@@ -31,8 +33,15 @@ export default function Authentication() {
           style={{ borderBottomRightRadius: 16 }}
         />
         <div className="absolute bottom-0 right-8 w-4 h-4 bg-[#e5e5e5]" />
-        {/* Logo */}
-        <img src={"/logo.svg"}></img>
+
+        {/* Logo with Home Navigation */}
+        <button
+          onClick={() => (window.location.href = "/")}
+          className="transition-all duration-300 hover:scale-105"
+        >
+          <img src={"/logo.svg"} alt="CodeMax Logo" />
+        </button>
+
         {/* Google Login Button */}
         <button
           onClick={handleGoogleSignIn}

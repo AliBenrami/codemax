@@ -3,6 +3,8 @@ import React, { useEffect, useRef, useState, use } from "react";
 import Editor, { OnMount } from "@monaco-editor/react";
 import { editor } from "monaco-editor";
 import { FC } from "react";
+import { useRouter } from "next/navigation";
+import { Code, User } from "lucide-react";
 import supabase from "@/app/util/supabase";
 
 interface PromptContent {
@@ -26,8 +28,10 @@ const ProblemPrompt: React.FC<{ content: PromptContent }> = ({ content }) => (
 
 const Question: FC<ProductPageProps> = ({ params }) => {
   const { id } = use(params);
+  const router = useRouter();
   const [output, setOutput] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
+
 
   const [content, setContent] = useState<PromptContent>({
     title: "temp",
@@ -106,6 +110,7 @@ const Question: FC<ProductPageProps> = ({ params }) => {
   };
 
   return (
+
     <div className="h-screen w-full flex flex-col bg-[#1e1e1e]">
       <div className="flex flex-row flex-1 overflow-hidden">
         {/* Problem Description and Output Side */}
