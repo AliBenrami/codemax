@@ -49,7 +49,9 @@ export default function Dashboard() {
       }
 
       if (difficulty !== 'all') {
-        query = query.eq('difficulty', difficulty.toLowerCase());
+        // Capitalize first letter for consistency with database values
+        const formattedDifficulty = difficulty.charAt(0).toUpperCase() + difficulty.slice(1).toLowerCase();
+        query = query.eq('difficulty', formattedDifficulty);
       }
 
       const { data, error } = await query;
