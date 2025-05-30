@@ -30,30 +30,46 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [difficulty, setDifficulty] = useState<string>('all');
 
+  // Add new state for infinite scroll
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const problemsPerPage = 10;
+
+  // Update the fetchProblems function to handle difficulty filtering
   useEffect(() => {
     const fetchProblems = async () => {
-      let query = supabase.from('problems').select('*');
+      setLoading(true);
+      let query = supabase
+        .from('problems')
+        .select('*')
+        .range((page - 1) * problemsPerPage, page * problemsPerPage - 1);
       
-      // Filter by category if not 'all'
       if (activeSubTab !== 'all') {
         query = query.eq('category', activeSubTab);
       }
 
-      // Filter by difficulty if not 'all'
       if (difficulty !== 'all') {
-        query = query.eq('difficulty', difficulty);
+        query = query.eq('difficulty', difficulty.toLowerCase());
       }
 
       const { data, error } = await query;
       
       if (data) {
-        setProblems(data);
+        setProblems(prev => page === 1 ? data : [...prev, ...data]);
+        setHasMore(data.length === problemsPerPage);
       }
       setLoading(false);
     };
 
     fetchProblems();
-  }, [activeSubTab, difficulty]);
+  }, [page, activeSubTab, difficulty]);
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const { scrollTop, clientHeight, scrollHeight } = e.currentTarget;
+    if (scrollHeight - scrollTop <= clientHeight * 1.5 && !loading && hasMore) {
+      setPage(prev => prev + 1);
+    }
+  };
 
   const navItems = [
     { id: 'problems', label: 'Problems', icon: <Code className="w-5 h-5" /> },
@@ -61,11 +77,8 @@ export default function Dashboard() {
     { id: 'multiplayer', label: 'Multiplayer', icon: <Network className="w-5 h-5" /> },
     { id: 'leaderboard', label: 'Leaderboard', icon: <ListOrdered className="w-5 h-5" /> },
   ];
-
   const learningTabs = [
-    { id: 'all', label: 'All Problems' },
-    { id: 'data-structures', label: 'Data Structures' },
-    { id: 'algorithms', label: 'Algorithms' },
+    { id: 'all', label: 'All Problems' }
   ];
 
   const difficulties = [
@@ -88,8 +101,7 @@ export default function Dashboard() {
     router.push(`/problems/${problemId}`);
   };
 
-  return (
-    <div className="min-h-screen bg-black text-white overflow-x-hidden">
+  return (    <div className="h-screen bg-black text-white overflow-hidden">
       {/* Subtle animated background elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div 
@@ -127,9 +139,8 @@ export default function Dashboard() {
         </div>
       </header>
 
-      <div className="flex">
-        {/* Sidebar */}
-        <aside className="w-72 bg-gray-900/40 backdrop-blur-sm min-h-screen p-8 hidden lg:block border-r border-gray-800">
+      <div className="flex">        {/* Sidebar */}
+        <aside className="w-80 bg-gray-900/40 backdrop-blur-sm min-h-screen p-8 hidden lg:block border-r border-gray-800">
           <div className="space-y-6">
             <div className="space-y-4">
               <button 
@@ -158,29 +169,35 @@ export default function Dashboard() {
             </div>
 
             <div className="pt-6 border-t border-gray-800">
-              <h3 className="text-xl font-bold mb-4 text-white">Learning Path</h3>
+              <h3 className="text-xl font-bold mb-4 bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">Learning Path</h3>
               <div className="space-y-3">
                 <button 
                   onClick={() => setActiveSubTab('data-structures')}
-                  className="w-full bg-gray-800/50 backdrop-blur-sm text-left px-4 py-3 rounded-lg transition-all duration-300 hover:bg-gray-700/50 border border-gray-700 hover:border-gray-600 hover:shadow-lg group"
+                  className="w-full bg-gray-800/50 backdrop-blur-sm p-4 rounded-xl transition-all duration-300 hover:bg-gray-700/50 border border-gray-700 hover:border-cyan-500 hover:shadow-lg hover:shadow-cyan-500/20 group"
                 >
                   <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 rounded-lg bg-cyan-500/10 text-cyan-400 flex items-center justify-center group-hover:bg-cyan-500/20 transition-colors">
-                      <Brain className="w-5 h-5" />
+                    <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-cyan-500/20 to-cyan-500/10 text-cyan-400 flex items-center justify-center group-hover:from-cyan-500/30 group-hover:to-cyan-500/20 transition-colors">
+                      <Brain className="w-6 h-6" />
                     </div>
-                    <span className="text-gray-300 group-hover:text-white transition-colors">Data Structures</span>
+                    <div>
+                      <h4 className="text-white font-semibold group-hover:text-cyan-400 transition-colors">Data Structures</h4>
+                      <p className="text-sm text-gray-400 group-hover:text-gray-300">Master fundamental structures</p>
+                    </div>
                   </div>
                 </button>
 
                 <button 
                   onClick={() => setActiveSubTab('algorithms')}
-                  className="w-full bg-gray-800/50 backdrop-blur-sm text-left px-4 py-3 rounded-lg transition-all duration-300 hover:bg-gray-700/50 border border-gray-700 hover:border-gray-600 hover:shadow-lg group"
+                  className="w-full bg-gray-800/50 backdrop-blur-sm p-4 rounded-xl transition-all duration-300 hover:bg-gray-700/50 border border-gray-700 hover:border-orange-500 hover:shadow-lg hover:shadow-orange-500/20 group"
                 >
                   <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 rounded-lg bg-orange-500/10 text-orange-400 flex items-center justify-center group-hover:bg-orange-500/20 transition-colors">
-                      <Code className="w-5 h-5" />
+                    <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-orange-500/20 to-orange-500/10 text-orange-400 flex items-center justify-center group-hover:from-orange-500/30 group-hover:to-orange-500/20 transition-colors">
+                      <Code className="w-6 h-6" />
                     </div>
-                    <span className="text-gray-300 group-hover:text-white transition-colors">Algorithms</span>
+                    <div>
+                      <h4 className="text-white font-semibold group-hover:text-orange-400 transition-colors">Algorithms</h4>
+                      <p className="text-sm text-gray-400 group-hover:text-gray-300">Learn problem-solving</p>
+                    </div>
                   </div>
                 </button>
               </div>
@@ -188,93 +205,92 @@ export default function Dashboard() {
           </div>
         </aside>
 
-        {/* Main Content */}
-        <main className="flex-1 p-6">
+        {/* Main Content */}        <main className="flex-1 p-6 relative h-screen overflow-hidden">
           {activeTab === 'problems' && (
-            <>
-              {/* Problem List Header */}
-              <div className="mb-6">
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-2xl font-bold text-white">Problem List</h2>
+            <div className="relative z-10 h-full flex flex-col">
+              <div className="flex-shrink-0 mb-6">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-2xl font-bold bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">Problem List</h2>
                   <div className="flex items-center space-x-4">
-                    <select
-                      value={difficulty}
-                      onChange={(e) => setDifficulty(e.target.value)}
-                      className="bg-gray-700 text-gray-300 px-4 py-2 rounded-lg border border-gray-600 focus:outline-none focus:border-green-500"
-                    >
-                      {difficulties.map((diff) => (
-                        <option key={diff.id} value={diff.id}>{diff.label}</option>
-                      ))}
-                    </select>
-                    <button className="flex items-center space-x-2 px-4 py-2 bg-gray-700 rounded-lg text-gray-300 hover:bg-gray-600">
+                    <div className="relative">
+                      <select
+                        value={difficulty}
+                        onChange={(e) => {
+                          setDifficulty(e.target.value);
+                          setPage(1);
+                          setProblems([]);
+                        }}
+                        className="appearance-none bg-gray-800/50 hover:bg-gray-700/50 backdrop-blur-sm text-gray-300 px-6 py-3 pr-10 rounded-full border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500/20 hover:border-gray-600 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-gray-500/20"
+                      >
+                        {difficulties.map((diff) => (
+                          <option key={diff.id} value={diff.id}>{diff.label}</option>
+                        ))}
+                      </select>
+                      <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                    </div>
+                    <button className="flex items-center space-x-2 px-6 py-3 bg-gray-800/50 hover:bg-gray-700/50 backdrop-blur-sm rounded-full text-gray-300 border border-gray-700 hover:border-gray-600 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-gray-500/20">
                       <Filter className="w-4 h-4" />
-                      <span>More Filters</span>
+                      <span>Filters</span>
                     </button>
                   </div>
                 </div>
-
-                <div className="flex space-x-4 border-b border-gray-700">
-                  {learningTabs.map((tab) => (
-                    <button
-                      key={tab.id}
-                      onClick={() => setActiveSubTab(tab.id)}
-                      className={`pb-2 px-4 transition-colors ${
-                        activeSubTab === tab.id
-                          ? 'text-green-400 border-b-2 border-green-400'
-                          : 'text-gray-400 hover:text-gray-300'
-                      }`}
-                    >
-                      {tab.label}
-                    </button>
-                  ))}
-                </div>
               </div>
 
-              {/* Problem List */}
-              <div className="bg-gray-800 rounded-lg">
-                <div className="grid grid-cols-12 gap-4 p-4 border-b border-gray-700 text-gray-400 font-medium">
-                  <div className="col-span-1">Status</div>
-                  <div className="col-span-5">Title</div>
-                  <div className="col-span-2">Difficulty</div>
-                  <div className="col-span-2">Category</div>
-                  <div className="col-span-2">Acceptance</div>
+              {/* Problem List with Fixed Height */}              <div className="bg-gray-900/40 backdrop-blur-sm rounded-3xl border border-gray-800 hover:border-gray-700/50 transition-all duration-500 shadow-lg">
+                <div className="grid grid-cols-12 gap-4 p-6 border-b border-gray-800 text-gray-400 font-medium sticky top-0 bg-gray-900/60 backdrop-blur-md z-10 rounded-t-3xl">
+                  <div className="col-span-1 text-sm uppercase tracking-wider">Status</div>
+                  <div className="col-span-5 text-sm uppercase tracking-wider">Title</div>
+                  <div className="col-span-2 text-sm uppercase tracking-wider">Difficulty</div>
+                  <div className="col-span-2 text-sm uppercase tracking-wider">Category</div>
+                  <div className="col-span-2 text-sm uppercase tracking-wider">Acceptance</div>
                 </div>
                 
-                {loading ? (
-                  <div className="text-center py-8 text-gray-400">Loading problems...</div>
-                ) : problems.length === 0 ? (
-                  <div className="text-center py-8 text-gray-400">No problems found matching your criteria</div>
-                ) : (
-                  <div className="divide-y divide-gray-700">
-                    {problems.map((problem) => (
-                      <div 
-                        key={problem.id} 
-                        onClick={() => handleProblemClick(problem.id)}
-                        className="grid grid-cols-12 gap-4 p-4 hover:bg-gray-700/50 cursor-pointer transition-colors"
-                      >
-                        <div className="col-span-1">
-                          {problem.solved ? (
-                            <div className="w-5 h-5 rounded-full bg-green-500/20 text-green-500 flex items-center justify-center">
-                              ✓
-                            </div>
-                          ) : (
-                            <div className="w-5 h-5 rounded-full bg-gray-500/20" />
-                          )}
+                <div                  className="h-[calc(100vh-300px)] overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-gray-700 hover:scrollbar-thumb-gray-600"
+                  onScroll={handleScroll}
+                >
+                  {loading && page === 1 ? (
+                    <div className="flex items-center justify-center py-8">
+                      <div className="w-8 h-8 border-2 border-green-500 border-t-transparent rounded-full animate-spin"></div>
+                    </div>
+                  ) : problems.length === 0 ? (
+                    <div className="text-center py-8 text-gray-400">No problems found matching your criteria</div>
+                  ) : (
+                    <div className="divide-y divide-gray-800">
+                      {problems.map((problem) => (
+                        <div 
+                          key={problem.id} 
+                          onClick={() => handleProblemClick(problem.id)}
+                          className="grid grid-cols-12 gap-4 p-6 hover:bg-gray-800/40 cursor-pointer transition-all duration-300 group hover:shadow-lg hover:shadow-gray-500/5"
+                        >
+                          <div className="col-span-1">
+                            {problem.solved ? (
+                              <div className="w-5 h-5 rounded-full bg-green-500/20 text-green-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                ✓
+                              </div>
+                            ) : (
+                              <div className="w-5 h-5 rounded-full bg-gray-700/20 group-hover:bg-gray-600/20 transition-colors" />
+                            )}
+                          </div>
+                          <div className="col-span-5 text-gray-300 group-hover:text-white transition-colors">
+                            {problem.title}
+                          </div>
+                          <div className={`col-span-2 ${getDifficultyColor(problem.difficulty)} group-hover:scale-105 transition-transform`}>
+                            {problem.difficulty}
+                          </div>
+                          <div className="col-span-2 text-gray-400 group-hover:text-gray-300 transition-colors">{problem.category}</div>
+                          <div className="col-span-2 text-gray-400 group-hover:text-gray-300 transition-colors">{problem.acceptance_rate}%</div>
                         </div>
-                        <div className="col-span-5 text-white hover:text-green-400 transition-colors">
-                          {problem.title}
+                      ))}
+                      {loading && page > 1 && (
+                        <div className="flex items-center justify-center py-4">
+                          <div className="w-6 h-6 border-2 border-green-500 border-t-transparent rounded-full animate-spin"></div>
                         </div>
-                        <div className={`col-span-2 ${getDifficultyColor(problem.difficulty)}`}>
-                          {problem.difficulty}
-                        </div>
-                        <div className="col-span-2 text-gray-400">{problem.category}</div>
-                        <div className="col-span-2 text-gray-400">{problem.acceptance_rate}%</div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
-            </>
+            </div>
           )}
 
           {activeTab === 'play' && (
