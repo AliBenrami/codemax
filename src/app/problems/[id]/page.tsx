@@ -18,20 +18,70 @@ interface ProductPageProps {
 
 // Separate component for the prompt display
 const ProblemPrompt: React.FC<{ content: PromptContent }> = ({ content }) => (
-  <div className="p-6 text-black">
-    <h1 className="text-2xl font-bold mb-2">{content.title}</h1>
-    <p className="text-gray-700">{content.description}</p>
+  <div className="p-8 text-gray-100 bg-gray-800 border-b border-gray-700">
+    <h1 className="text-3xl font-bold mb-4 text-white">{content.title}</h1>
+    <p className="text-gray-300 leading-relaxed whitespace-pre-wrap">
+      {content.description}
+    </p>
   </div>
 );
 
 const Question: FC<ProductPageProps> = ({ params }) => {
   const { id } = use(params);
   const router = useRouter();
+  const [output, setOutput] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(false);
+
 
   const [content, setContent] = useState<PromptContent>({
     title: "temp",
     description: "Write a function.",
   });
+
+  // Function to run the code
+  const runCode = async () => {
+    if (!editorRef.current) return;
+
+    setIsLoading(true);
+    setOutput("");
+    try {
+      const code = editorRef.current.getValue();
+      console.log("Sending code to API:", code);
+      const response = await fetch("/api/run", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          code,
+          language: "python", // You can make this dynamic later
+          input: "", // Add input field if needed
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.error) {
+        setOutput(`Error: ${result.error}`);
+        return;
+      }
+
+      // Format the output
+      let outputText = "";
+      if (result.compile_output)
+        outputText += `Compilation Output:\n${result.compile_output}\n\n`;
+      if (result.stdout) outputText += `Program Output:\n${result.stdout}\n`;
+      if (result.stderr) outputText += `Error Output:\n${result.stderr}\n`;
+      if (result.message) outputText += `Message:\n${result.message}\n`;
+
+      setOutput(outputText || "No output");
+    } catch (error) {
+      setOutput("Failed to execute code. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     const init = async () => {
@@ -60,48 +110,117 @@ const Question: FC<ProductPageProps> = ({ params }) => {
   };
 
   return (
-    <div className="h-screen w-screen flex flex-col bg-black">
-      <header className="relative z-50 flex justify-between items-center p-6 backdrop-blur-sm bg-gray-900/30 border-b border-gray-800">
-        <button
-          onClick={() => router.push("/")}
-          className="flex items-center space-x-3 transition-all duration-300 hover:scale-105"
-        >
-          <div className="w-10 h-10 bg-gradient-to-r from-white to-gray-300 rounded-full flex items-center justify-center">
-            <Code className="w-6 h-6 text-black" />
+
+    <div className="h-screen w-full flex flex-col bg-[#1e1e1e]">
+      <div className="flex flex-row flex-1 overflow-hidden">
+        {/* Problem Description and Output Side */}
+        <div className="h-full w-1/2 bg-gray-900 flex flex-col">
+          {/* Make the problem prompt scrollable */}
+          <div className="overflow-y-auto max-h-[50%]">
+            <ProblemPrompt content={content} />
           </div>
-          <span className="text-2xl font-bold text-white">CodeMax</span>
-        </button>
 
-        <div className="relative">
-          <button
-            onClick={() => router.push("/Profile")}
-            className="flex items-center space-x-2 bg-gray-800/50 hover:bg-gray-700/50 backdrop-blur-sm rounded-full px-6 py-3 transition-all duration-300 hover:scale-105 border border-gray-700 hover:border-gray-600 hover:shadow-lg hover:shadow-gray-500/20"
-          >
-            <User className="w-5 h-5" />
-            <span>Profile</span>
-          </button>
+          {/* Output Section */}
+          <div className="flex-1 p-6 bg-gray-900 overflow-auto">
+            <div className="mb-2 text-sm font-medium text-gray-400">Output</div>
+            <div className="font-mono whitespace-pre-wrap bg-[#1e1e1e] text-gray-200 p-5 rounded-lg shadow-lg border border-gray-800 min-h-[200px] overflow-auto">
+              {isLoading ? (
+                <div className="text-gray-300 flex items-center">
+                  <svg
+                    className="animate-spin h-5 w-5 mr-3 text-blue-500"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                      fill="none"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  Running code...
+                </div>
+              ) : (
+                <span className={output ? "text-gray-100" : "text-gray-500"}>
+                  {output || "Code output will appear here"}
+                </span>
+              )}
+            </div>
+          </div>
         </div>
-      </header>
 
-      <div className="flex flex-1">
-        <div className="h-full w-1/2 bg-gray-900/40 backdrop-blur-sm border-r border-gray-700">
-          <ProblemPrompt content={content} />
+        {/* Editor Side */}
+        <div className="h-full w-1/2 flex flex-col bg-[#1e1e1e]">
+          <div className="p-4 bg-[#252526] border-b border-gray-800 flex items-center justify-between">
+            <div className="text-sm font-medium text-gray-400">
+              Python Editor
+            </div>
+            <button
+              onClick={runCode}
+              disabled={isLoading}
+              className={`px-6 py-2 rounded-md text-white font-medium transition-all duration-200 ${
+                isLoading
+                  ? "bg-blue-600/50 cursor-not-allowed"
+                  : "bg-blue-600 hover:bg-blue-700 active:transform active:scale-95"
+              }`}
+            >
+              {isLoading ? (
+                <span className="flex items-center">
+                  <svg
+                    className="animate-spin h-4 w-4 mr-2"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                      fill="none"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  Running...
+                </span>
+              ) : (
+                "Run Code"
+              )}
+            </button>
+          </div>
+
+          <Editor
+            height="calc(100% - 64px)"
+            width="100%"
+            defaultLanguage="python"
+            defaultValue={`# Write your Python code here\n`}
+            onMount={handleEditorDidMount}
+            options={{
+              minimap: { enabled: false },
+              fontSize: 16,
+              scrollBeyondLastLine: false,
+              wordWrap: "on",
+              theme: "vs-dark",
+              padding: { top: 20 },
+              lineNumbers: "on",
+              renderLineHighlight: "all",
+              suggest: {
+                showKeywords: true,
+              },
+            }}
+          />
         </div>
-
-        <Editor
-          height="100%"
-          width="50%"
-          defaultLanguage="python"
-          defaultValue={`# Function to sum two numbers\ndef temp(self):\n    # Add your code here`}
-          theme="vs-dark"
-          onMount={handleEditorDidMount}
-          options={{
-            minimap: { enabled: false },
-            fontSize: 14,
-            scrollBeyondLastLine: false,
-            wordWrap: "on",
-          }}
-        />
       </div>
     </div>
   );

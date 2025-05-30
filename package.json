@@ -12,6 +12,8 @@
     "@monaco-editor/react": "^4.7.0",
     "@supabase/supabase-js": "^2.49.8",
     "lucide-react": "^0.511.0",
+   "dotenv": "^16.5.0",
+    "express": "^5.1.0",
     "monaco-editor": "^0.52.2",
     "next": "^15.3.2",
     "react": "^19.0.0",
