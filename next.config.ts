@@ -1,7 +1,16 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
-  /* config options here */
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  serverRuntimeConfig: {
+    JUDGE0_API_KEY: process.env.JUDGE0_API_KEY,
+    JUDGE0_API_URL: process.env.JUDGE0_API_URL,
+  },
+  publicRuntimeConfig: {
+    // Add public configs here if needed
+  },
+  // Enable experimental features if needed
+  experimental: {
+    serverActions: true,
+  },
 };
 
-export default nextConfig;
+module.exports = nextConfig;
