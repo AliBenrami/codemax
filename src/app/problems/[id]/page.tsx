@@ -3,6 +3,8 @@ import React, { useEffect, useRef, useState, use } from "react";
 import Editor, { OnMount } from "@monaco-editor/react";
 import { editor } from "monaco-editor";
 import { FC } from "react";
+import { useRouter } from "next/navigation";
+import { Code, User } from "lucide-react";
 import supabase from "@/app/util/supabase";
 
 interface PromptContent {
@@ -24,6 +26,7 @@ const ProblemPrompt: React.FC<{ content: PromptContent }> = ({ content }) => (
 
 const Question: FC<ProductPageProps> = ({ params }) => {
   const { id } = use(params);
+  const router = useRouter();
 
   const [content, setContent] = useState<PromptContent>({
     title: "temp",
@@ -57,26 +60,49 @@ const Question: FC<ProductPageProps> = ({ params }) => {
   };
 
   return (
-    <div className="h-screen w-screen flex flex-row">
-      <div className="h-screen w-1/2 bg-white border-r border-gray-200">
-        <ProblemPrompt content={content} />
-      </div>
+    <div className="h-screen w-screen flex flex-col bg-black">
+      <header className="relative z-50 flex justify-between items-center p-6 backdrop-blur-sm bg-gray-900/30 border-b border-gray-800">
+        <button
+          onClick={() => router.push("/")}
+          className="flex items-center space-x-3 transition-all duration-300 hover:scale-105"
+        >
+          <div className="w-10 h-10 bg-gradient-to-r from-white to-gray-300 rounded-full flex items-center justify-center">
+            <Code className="w-6 h-6 text-black" />
+          </div>
+          <span className="text-2xl font-bold text-white">CodeMax</span>
+        </button>
 
-      <Editor
-        height="100vh"
-        width="50%"
-        defaultLanguage="python"
-        defaultValue={`# Function to sum two numbers
-def temp(self):
-    # Add your code here`}
-        onMount={handleEditorDidMount}
-        options={{
-          minimap: { enabled: false },
-          fontSize: 14,
-          scrollBeyondLastLine: false,
-          wordWrap: "on",
-        }}
-      />
+        <div className="relative">
+          <button
+            onClick={() => router.push("/Profile")}
+            className="flex items-center space-x-2 bg-gray-800/50 hover:bg-gray-700/50 backdrop-blur-sm rounded-full px-6 py-3 transition-all duration-300 hover:scale-105 border border-gray-700 hover:border-gray-600 hover:shadow-lg hover:shadow-gray-500/20"
+          >
+            <User className="w-5 h-5" />
+            <span>Profile</span>
+          </button>
+        </div>
+      </header>
+
+      <div className="flex flex-1">
+        <div className="h-full w-1/2 bg-gray-900/40 backdrop-blur-sm border-r border-gray-700">
+          <ProblemPrompt content={content} />
+        </div>
+
+        <Editor
+          height="100%"
+          width="50%"
+          defaultLanguage="python"
+          defaultValue={`# Function to sum two numbers\ndef temp(self):\n    # Add your code here`}
+          theme="vs-dark"
+          onMount={handleEditorDidMount}
+          options={{
+            minimap: { enabled: false },
+            fontSize: 14,
+            scrollBeyondLastLine: false,
+            wordWrap: "on",
+          }}
+        />
+      </div>
     </div>
   );
 };

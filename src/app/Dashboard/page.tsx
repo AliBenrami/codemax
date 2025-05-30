@@ -122,15 +122,19 @@ export default function Dashboard() {
 
       {/* Header */}
       <header className="relative z-50 flex justify-between items-center p-6 backdrop-blur-sm bg-gray-900/30 border-b border-gray-800">
-        <div className="flex items-center space-x-3">
+        <button 
+          onClick={() => router.push('/')}
+          className="flex items-center space-x-3 transition-all duration-300 hover:scale-105"
+        >
           <div className="w-10 h-10 bg-gradient-to-r from-white to-gray-300 rounded-full flex items-center justify-center">
             <Code className="w-6 h-6 text-black" />
           </div>
           <span className="text-2xl font-bold text-white">CodeMax</span>
-        </div>
+        </button>
         
         <div className="relative">
           <button
+            onClick={() => router.push('/Profile')}
             className="flex items-center space-x-2 bg-gray-800/50 hover:bg-gray-700/50 backdrop-blur-sm rounded-full px-6 py-3 transition-all duration-300 hover:scale-105 border border-gray-700 hover:border-gray-600 hover:shadow-lg hover:shadow-gray-500/20"
           >
             <User className="w-5 h-5" />
@@ -220,7 +224,7 @@ export default function Dashboard() {
                           setPage(1);
                           setProblems([]);
                         }}
-                        className="appearance-none bg-gray-800/50 hover:bg-gray-700/50 backdrop-blur-sm text-gray-300 px-6 py-3 pr-10 rounded-full border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500/20 hover:border-gray-600 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-gray-500/20"
+                        className="appearance-none bg-gray-900/40 backdrop-blur-sm text-gray-300 px-4 py-2 pr-10 rounded-xl border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500/20 hover:border-gray-600 transition-all duration-300"
                       >
                         {difficulties.map((diff) => (
                           <option key={diff.id} value={diff.id}>{diff.label}</option>
@@ -228,7 +232,7 @@ export default function Dashboard() {
                       </select>
                       <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                     </div>
-                    <button className="flex items-center space-x-2 px-6 py-3 bg-gray-800/50 hover:bg-gray-700/50 backdrop-blur-sm rounded-full text-gray-300 border border-gray-700 hover:border-gray-600 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-gray-500/20">
+                    <button className="flex items-center space-x-2 px-4 py-2 bg-gray-900/40 backdrop-blur-sm rounded-xl text-gray-300 border border-gray-700 hover:border-gray-600 hover:bg-gray-800/40 transition-all duration-300 hover:shadow-lg">
                       <Filter className="w-4 h-4" />
                       <span>Filters</span>
                     </button>
@@ -236,16 +240,18 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* Problem List with Fixed Height */}              <div className="bg-gray-900/40 backdrop-blur-sm rounded-3xl border border-gray-800 hover:border-gray-700/50 transition-all duration-500 shadow-lg">
-                <div className="grid grid-cols-12 gap-4 p-6 border-b border-gray-800 text-gray-400 font-medium sticky top-0 bg-gray-900/60 backdrop-blur-md z-10 rounded-t-3xl">
-                  <div className="col-span-1 text-sm uppercase tracking-wider">Status</div>
-                  <div className="col-span-5 text-sm uppercase tracking-wider">Title</div>
-                  <div className="col-span-2 text-sm uppercase tracking-wider">Difficulty</div>
-                  <div className="col-span-2 text-sm uppercase tracking-wider">Category</div>
-                  <div className="col-span-2 text-sm uppercase tracking-wider">Acceptance</div>
+              {/* Problem List with Fixed Height */}
+              <div className="bg-gray-900/40 backdrop-blur-sm rounded-xl border border-gray-800">
+                <div className="grid grid-cols-12 gap-4 p-4 border-b border-gray-800 text-gray-400 font-medium sticky top-0 bg-gray-900/60 backdrop-blur-md z-10">
+                  <div className="col-span-1">Status</div>
+                  <div className="col-span-5">Title</div>
+                  <div className="col-span-2">Difficulty</div>
+                  <div className="col-span-2">Category</div>
+                  <div className="col-span-2">Acceptance</div>
                 </div>
                 
-                <div                  className="h-[calc(100vh-300px)] overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-gray-700 hover:scrollbar-thumb-gray-600"
+                <div 
+                  className="h-[calc(100vh-400px)] overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-gray-700 hover:scrollbar-thumb-gray-600"
                   onScroll={handleScroll}
                 >
                   {loading && page === 1 ? (
@@ -260,7 +266,7 @@ export default function Dashboard() {
                         <div 
                           key={problem.id} 
                           onClick={() => handleProblemClick(problem.id)}
-                          className="grid grid-cols-12 gap-4 p-6 hover:bg-gray-800/40 cursor-pointer transition-all duration-300 group hover:shadow-lg hover:shadow-gray-500/5"
+                          className="grid grid-cols-12 gap-4 p-4 hover:bg-gray-800/40 cursor-pointer transition-all duration-300 group"
                         >
                           <div className="col-span-1">
                             {problem.solved ? (

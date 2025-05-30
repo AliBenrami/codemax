@@ -1,8 +1,11 @@
 'use client'
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { User } from 'lucide-react';
 
 
 export default function Home() {
+  const router = useRouter();
   const [scrollY, setScrollY] = useState<number>(0);
   const [isVisible, setIsVisible] = useState<Record<string, boolean>>({});
   const [showProfileMenu, setShowProfileMenu] = useState<boolean>(false);
@@ -32,39 +35,37 @@ export default function Home() {
 
     return () => observer.disconnect();
   }, []);
-
   // Navigation functions with unique routes
   const handleSignUp = () => {
-    window.location.href = '/signup';
+    router.push('/signup');
   };
 
   const handleLogin = () => {
-    window.location.href = '/login';
-
+    router.push('/login');
   };
 
   const handleGetStarted = () => {
-    window.location.href = '/Dashboard';
+    router.push('/Dashboard');
   };
 
   const handleBrowseProblems = () => {
-    window.location.href = '/problems';
+    router.push('/problems');
   };
 
   const handleStartLearning = () => {
-    window.location.href = '/Dashboard';
+    router.push('/Dashboard');
   };
 
   const handleCommunity = () => {
-    window.location.href = '/Dashboard';
+    router.push('/Dashboard');
   };
 
   const handleProgress = () => {
-    window.location.href = '/Dashboard';
+    router.push('/Dashboard');
   };
 
   const handleInteractive = () => {
-    window.location.href = '/Dashboard';
+    router.push('/Dashboard');
   };
 
   // Heroicons SVG components
@@ -204,8 +205,15 @@ export default function Home() {
           {showProfileMenu && (
             <div className="absolute right-0 mt-2 w-48 bg-gray-900/95 backdrop-blur-md rounded-2xl shadow-2xl border border-gray-700">
               <button 
-                onClick={handleLogin}
+                onClick={() => router.push('/Profile')}
                 className="w-full text-left px-6 py-4 hover:bg-gray-800/50 rounded-t-2xl transition-all duration-300 flex items-center space-x-3 hover:shadow-inner"
+              >
+                <User className="w-4 h-4" />
+                <span>Profile</span>
+              </button>
+              <button 
+                onClick={handleLogin}
+                className="w-full text-left px-6 py-4 hover:bg-gray-800/50 transition-all duration-300 flex items-center space-x-3 hover:shadow-inner"
               >
                 <KeyIcon />
                 <span>Login</span>
