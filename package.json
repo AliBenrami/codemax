@@ -11,8 +11,9 @@
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
     "@supabase/supabase-js": "^2.49.8",
+    "lucide-react": "^0.511.0",
     "monaco-editor": "^0.52.2",
-    "next": "15.3.2",
+    "next": "^15.3.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
